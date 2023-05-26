@@ -1,25 +1,20 @@
 import 'dart:convert';
 
-List<TodoModel> todoModelFromJson(String str) => List<TodoModel>.from(json.decode(str).map((x) => TodoModel.fromJson(x)));
+List<UserModel> todoModelFromJson(String str) =>
+    List<UserModel>.from(json.decode(str).map((x) => UserModel.fromJson(x)));
 
-String todoModelToJson(List<TodoModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String todoModelToJson(List<UserModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class TodoModel {
-  TodoModel({
-    required this.todoId,
-    required this.description,
-  });
+class UserModel {
+  UserModel({required this.id, required this.email, required this.name});
 
-  int todoId;
-  String description;
+  int id;
+  String name;
+  String email;
 
-  factory TodoModel.fromJson(Map<String, dynamic> json) => TodoModel(
-        todoId: json["todo_id"],
-        description: json["description"],
-      );
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      UserModel(id: json["id"], name: json["name"], email: json["email"]);
 
-  Map<String, dynamic> toJson() => {
-        "todo_id": todoId,
-        "description": description,
-      };
+  Map<String, dynamic> toJson() => {"id": id, "name": name, "email": email};
 }

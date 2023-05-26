@@ -1,38 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_node/models/todo_model.dart';
-import 'package:flutter_node/pages/bloc/todos_bloc.dart';
+import 'package:flutter_node/pages/bloc/user_bloc.dart';
 
-class UpdateScreenPage extends StatefulWidget {
-  final TodoModel todo;
+class CreateScreenPage extends StatefulWidget {
   final void Function() refreshFn;
 
-  const UpdateScreenPage({required this.todo, required this.refreshFn, Key? key}) : super(key: key);
+  const CreateScreenPage({required this.refreshFn, Key? key}) : super(key: key);
 
   @override
-  _UpdateScreenPageState createState() => _UpdateScreenPageState();
+  _CreateScreenPageState createState() => _CreateScreenPageState();
 }
 
-class _UpdateScreenPageState extends State<UpdateScreenPage> {
-  TodosBloc bloc = TodosBloc();
-  TextEditingController descController = TextEditingController();
-  @override
-  void initState() {
-    super.initState();
-    descController.text = widget.todo.description;
-  }
-
+class _CreateScreenPageState extends State<CreateScreenPage> {
+  UsersBloc bloc = UsersBloc();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TodosBloc, TodosState>(
+    return BlocConsumer<UsersBloc, UsersState>(
       bloc: bloc,
       listener: (context, state) {
-        if (state is TodosUpdateLoadingState) {
+        if (state is UsersCreateLoadingState) {
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: const Text('Please Wait'),
-              content: const Text('Editing.'),
+              content: const Text('Creating.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.pop(context, 'Okay'),
@@ -41,13 +35,13 @@ class _UpdateScreenPageState extends State<UpdateScreenPage> {
               ],
             ),
           );
-        } else if (state is TodosUpdateLoadedState) {
+        } else if (state is UsersCreateLoadedState) {
           Navigator.pop(context);
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: const Text('Success'),
-              content: const Text('Edited.'),
+              content: const Text('Created.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.pop(context, 'Okay'),
@@ -62,25 +56,34 @@ class _UpdateScreenPageState extends State<UpdateScreenPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text("EDIT"),
+            title: const Text("Create"),
           ),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 TextField(
-                  controller: descController,
-                  decoration: const InputDecoration(labelText: "Description"),
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Name"),
+                ),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: "Email"),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     bloc.add(
-                      TodosUpdateEvent(
-                        TodoModel(todoId: widget.todo.todoId, description: descController.text),
+                      UsersCreateEvent(
+                        UserModel(
+                            id: 0,
+                            name: nameController.text,
+                            email: emailController.text),
                       ),
                     );
+                    nameController.text = '';
+                    emailController.text = '';
                   },
-                  child: const Text("Edit"),
+                  child: const Text("Create"),
                 )
               ],
             ),

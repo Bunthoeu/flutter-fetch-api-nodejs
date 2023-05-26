@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_node/models/todo_model.dart';
-import 'package:flutter_node/pages/create_screen.dart';
-import 'package:flutter_node/pages/update_screen.dart';
+import 'package:flutter_node/pages/create_user_screen/create_screen.dart';
+import 'package:flutter_node/pages/update_screen/update_screen.dart';
 
-import 'bloc/todos_bloc.dart';
+import '../bloc/user_bloc.dart';
 
 class HomeScreenPage extends StatefulWidget {
   const HomeScreenPage({Key? key}) : super(key: key);
@@ -14,32 +14,32 @@ class HomeScreenPage extends StatefulWidget {
 }
 
 class _HomeScreenPageState extends State<HomeScreenPage> {
-  TodosBloc bloc = TodosBloc();
+  UsersBloc bloc = UsersBloc();
   var loaded = false;
-  List<TodoModel>? todos;
+  List<UserModel>? todos;
   @override
   void initState() {
     super.initState();
-    bloc.add(TodosStartEvent());
+    bloc.add(UnitUsersStartEvent());
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TodosBloc(),
+      create: (context) => UsersBloc(),
       child: BlocListener(
         bloc: bloc,
         listener: (context, state) {
-          if (state is TodosLoadingState) {
+          if (state is UsersLoadingState) {
             setState(() {
               loaded = false;
             });
-          } else if (state is TodosLoadedState) {
+          } else if (state is UsersLoadedState) {
             todos = state.todos;
             setState(() {
               loaded = true;
             });
-          } else if (state is TodosDeleteLoadingState) {
+          } else if (state is UsersDeleteLoadingState) {
             showDialog<String>(
               context: context,
               builder: (BuildContext context) => AlertDialog(
@@ -53,7 +53,7 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                 ],
               ),
             );
-          } else if (state is TodosDeleteLoadedState) {
+          } else if (state is UsersDeleteLoadedState) {
             Navigator.pop(context);
             showDialog<String>(
               context: context,
@@ -68,39 +68,63 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                 ],
               ),
             );
-            bloc.add(TodosStartEvent());
+            bloc.add(UnitUsersStartEvent());
           }
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text("TODO"),
+            title: const Text("USER LIST"),
           ),
           body: loaded
               ? ListView.builder(
                   itemCount: todos!.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => UpdateScreenPage(
-                              todo: todos![index],
-                              refreshFn: () {
-                                bloc.add(TodosStartEvent());
+                  UserModel  user =  todos![index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(todos![index].name),
+                        leading: CircleAvatar(
+                          child: Text(user.id.toString()),
+                        ),
+                        trailing: Wrap(
+                          spacing: 12,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdateScreenPage(
+                                      todo: todos![index],
+                                      refreshFn: () {
+                                        bloc.add(UnitUsersStartEvent());
+                                      },
+                                    ),
+                                  ),
+                                );
                               },
+                              child: const Padding(
+                                padding: EdgeInsets.only(top: 12),
+                                child: Icon(
+                                  Icons.edit,
+                                  color: Colors.green,
+                                ),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      title: Text(todos![index].description),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          bloc.add(
-                            TodosDeleteEvent(todos![index]),
-                          );
-                        },
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                bloc.add(
+                                  UsersDeleteEvent(todos![index]),
+                                );
+                              },
+                            ), // icon-1
+                            // icon-2
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -115,7 +139,7 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
                 MaterialPageRoute(
                   builder: (context) => CreateScreenPage(
                     refreshFn: () {
-                      bloc.add(TodosStartEvent());
+                      bloc.add(UnitUsersStartEvent());
                     },
                   ),
                 ),

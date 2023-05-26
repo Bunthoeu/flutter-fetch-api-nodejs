@@ -1,31 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_node/models/todo_model.dart';
-import 'package:flutter_node/pages/bloc/todos_bloc.dart';
+import 'package:flutter_node/pages/bloc/user_bloc.dart';
 
-class CreateScreenPage extends StatefulWidget {
+class UpdateScreenPage extends StatefulWidget {
+  final UserModel todo;
   final void Function() refreshFn;
 
-  const CreateScreenPage({required this.refreshFn, Key? key}) : super(key: key);
+  const UpdateScreenPage(
+      {required this.todo, required this.refreshFn, Key? key})
+      : super(key: key);
 
   @override
-  _CreateScreenPageState createState() => _CreateScreenPageState();
+  _UpdateScreenPageState createState() => _UpdateScreenPageState();
 }
 
-class _CreateScreenPageState extends State<CreateScreenPage> {
-  TodosBloc bloc = TodosBloc();
-  TextEditingController descController = TextEditingController();
+class _UpdateScreenPageState extends State<UpdateScreenPage> {
+  UsersBloc bloc = UsersBloc();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    nameController.text = widget.todo.name;
+    emailController.text = widget.todo.email;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TodosBloc, TodosState>(
+    return BlocConsumer<UsersBloc, UsersState>(
       bloc: bloc,
       listener: (context, state) {
-        if (state is TodosCreateLoadingState) {
+        if (state is UsersUpdateLoadingState) {
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: const Text('Please Wait'),
-              content: const Text('Creating.'),
+              content: const Text('Editing.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.pop(context, 'Okay'),
@@ -34,13 +45,13 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
               ],
             ),
           );
-        } else if (state is TodosCreateLoadedState) {
+        } else if (state is UsersUpdateLoadedState) {
           Navigator.pop(context);
           showDialog<String>(
             context: context,
             builder: (BuildContext context) => AlertDialog(
               title: const Text('Success'),
-              content: const Text('Created.'),
+              content: const Text('Edited.'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.pop(context, 'Okay'),
@@ -55,25 +66,32 @@ class _CreateScreenPageState extends State<CreateScreenPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Create"),
+            title: const Text("EDIT"),
           ),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
                 TextField(
-                  controller: descController,
-                  decoration: const InputDecoration(labelText: "Description"),
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Name"),
+                ),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: "Email"),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     bloc.add(
-                      TodosCreateEvent(
-                        TodoModel(todoId: 0, description: descController.text),
+                      UsersUpdateEvent(
+                        UserModel(
+                            id: widget.todo.id,
+                            name: nameController.text,
+                            email: emailController.text),
                       ),
                     );
                   },
-                  child: const Text("Create"),
+                  child: const Text("Edit"),
                 )
               ],
             ),
